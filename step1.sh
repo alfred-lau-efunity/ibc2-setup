@@ -16,7 +16,6 @@ echo "✅ RDP set up"
 
 
 #############################################################################
-#!/bin/bash
 
 # DeepFace Models Downloader
 # Downloads all release files from deepface_models v1.0 release
@@ -25,15 +24,16 @@ set -e  # Exit on any error
 
 # Configuration
 RELEASE_URL="https://github.com/serengil/deepface_models/releases/tag/v1.0"
-DOWNLOAD_DIR="/home/ggc_user/.deepface/weights"
+TEMP_DOWNLOAD_DIR="/home/user/deepface_weights"
+FINAL_DIR="/home/ggc_user/.deepface/weights"
 API_URL="https://api.github.com/repos/serengil/deepface_models/releases/tags/v1.0"
 
 echo "DeepFace Models Downloader"
 echo "=========================="
 
-# Create the target directory if it doesn't exist
-echo "Creating directory: $DOWNLOAD_DIR"
-mkdir -p "$DOWNLOAD_DIR"
+# Create the temporary download directory if it doesn't exist
+echo "Creating temporary download directory: $TEMP_DOWNLOAD_DIR"
+mkdir -p "$TEMP_DOWNLOAD_DIR"
 
 # Get release information from GitHub API
 echo "Fetching release information..."
@@ -69,7 +69,7 @@ echo "$DOWNLOAD_URLS" | while IFS= read -r url; do
     if [ -n "$url" ]; then
         # Extract filename from URL
         FILENAME=$(basename "$url")
-        FILEPATH="$DOWNLOAD_DIR/$FILENAME"
+        FILEPATH="$TEMP_DOWNLOAD_DIR/$FILENAME"
         
         echo "[$CURRENT/$TOTAL_FILES] Downloading: $FILENAME"
         
@@ -91,13 +91,34 @@ echo "$DOWNLOAD_URLS" | while IFS= read -r url; do
     fi
 done
 
-echo "Download completed!"
-echo "Files saved to: $DOWNLOAD_DIR"
+echo "All files downloaded to temporary directory: $TEMP_DOWNLOAD_DIR"
 
-# List downloaded files
+# Create final directory structure with sudo
+echo "Creating final directory structure..."
+sudo mkdir -p "$FINAL_DIR"
+
+# Move files to final location with sudo
+echo "Moving files to final location..."
+if sudo mv "$TEMP_DOWNLOAD_DIR"/* "$FINAL_DIR/"; then
+    echo "✓ Files moved successfully to $FINAL_DIR"
+    
+    # Clean up temporary directory
+    echo "Cleaning up temporary directory..."
+    rmdir "$TEMP_DOWNLOAD_DIR"
+    echo "✓ Temporary directory removed"
+else
+    echo "✗ Failed to move files to final location"
+    echo "Files remain in: $TEMP_DOWNLOAD_DIR"
+    exit 1
+fi
+
+echo "Download and installation completed!"
+echo "Files installed to: $FINAL_DIR"
+
+# List installed files
 echo ""
-echo "Downloaded files:"
-ls -la "$DOWNLOAD_DIR"
+echo "Installed files:"
+sudo ls -la "$FINAL_DIR"
 
 #############################################################################
 
