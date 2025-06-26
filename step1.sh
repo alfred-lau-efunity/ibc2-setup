@@ -150,7 +150,7 @@ sudo ls -la "$FINAL_DIR"
 
 # Generate YAML file
 
-cat > "$OUTPUT_YAML_PATH" <<EOF
+sudo cat > "$OUTPUT_YAML_PATH" <<EOF
 ---
 services:
   aws.greengrass.Nucleus:
