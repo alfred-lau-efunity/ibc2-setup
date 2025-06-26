@@ -94,7 +94,7 @@ echo "$DOWNLOAD_URLS" | while IFS= read -r url; do
         # Extract filename from URL
         FILENAME=$(basename "$url")
         FILEPATH="$TEMP_DOWNLOAD_DIR/$FILENAME"
-        DESTPATH="$FINAL_DR/$FILENAME"
+        DESTPATH="$FINAL_DIR/$FILENAME"
         
         echo "[$CURRENT/$TOTAL_FILES] Downloading: $FILENAME"
         
