@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e  # Exit on any error
+
 sudo apt update
 sudo apt install xrdp -y
 sudo apt install xfce4 xfce4-session -y
@@ -14,13 +16,36 @@ sudo ufw allow 3389/tcp
 
 echo "✅ RDP set up"
 
+#############################################################################
+
+DEVICE_DATA_PATH="/var/tmp/device_data.json"
+OUTPUT_YAML_PATH="/home/user/fsa_programs/aws_iot_env_setup/GreengrassInstaller/config.yaml"
+CLAIM_CERTS_PATH="/home/user/fsa_programs/aws_iot_env_setup/claim-certs"
+
+sudo timedatectl set-timezone Asia/Singapore
+timedatectl
+
+if [ ! -d "$CLAIM_CERTS_PATH" ]; then
+  echo "Error: claim-certs directory not found."
+  exit 1
+fi
+
+if [ ! -f "$DEVICE_DATA_PATH" ]; then
+  echo "Error: Device data file not found at $DEVICE_DATA_PATH" >&2
+  exit 1
+fi
+
+DEVICE_ID=$(jq -r '.DeviceId' "$DEVICE_DATA_PATH")
+if [ -z "$DEVICE_ID" ] || [ "$DEVICE_ID" == "null" ]; then
+  echo "Error: DeviceId not found in $DEVICE_DATA_PATH" >&2
+  exit 1
+fi
 
 #############################################################################
 
 # DeepFace Models Downloader
 # Downloads all release files from deepface_models v1.0 release
 
-set -e  # Exit on any error
 
 # Configuration
 RELEASE_URL="https://github.com/serengil/deepface_models/releases/tag/v1.0"
@@ -122,28 +147,6 @@ sudo ls -la "$FINAL_DIR"
 
 #############################################################################
 
-DEVICE_DATA_PATH="/var/tmp/device_data.json"
-OUTPUT_YAML_PATH="/home/user/fsa_programs/aws_iot_env_setup/GreengrassInstaller/config.yaml"
-CLAIM_CERTS_PATH="/home/user/fsa_programs/aws_iot_env_setup/claim-certs"
-
-sudo timedatectl set-timezone Asia/Singapore
-timedatectl
-
-if [ ! -d "$CLAIM_CERTS_PATH" ]; then
-  echo "Error: claim-certs directory not found."
-  exit 1
-fi
-
-if [ ! -f "$DEVICE_DATA_PATH" ]; then
-  echo "Error: Device data file not found at $DEVICE_DATA_PATH" >&2
-  exit 1
-fi
-
-DEVICE_ID=$(jq -r '.DeviceId' "$DEVICE_DATA_PATH")
-if [ -z "$DEVICE_ID" ] || [ "$DEVICE_ID" == "null" ]; then
-  echo "Error: DeviceId not found in $DEVICE_DATA_PATH" >&2
-  exit 1
-fi
 # Generate YAML file
 
 cat > "$OUTPUT_YAML_PATH" <<EOF
