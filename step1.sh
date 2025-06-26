@@ -14,6 +14,93 @@ sudo ufw allow 3389/tcp
 
 echo "✅ RDP set up"
 
+
+#############################################################################
+#!/bin/bash
+
+# DeepFace Models Downloader
+# Downloads all release files from deepface_models v1.0 release
+
+set -e  # Exit on any error
+
+# Configuration
+RELEASE_URL="https://github.com/serengil/deepface_models/releases/tag/v1.0"
+DOWNLOAD_DIR="/home/ggc_user/.deepface/weights"
+API_URL="https://api.github.com/repos/serengil/deepface_models/releases/tags/v1.0"
+
+echo "DeepFace Models Downloader"
+echo "=========================="
+
+# Create the target directory if it doesn't exist
+echo "Creating directory: $DOWNLOAD_DIR"
+mkdir -p "$DOWNLOAD_DIR"
+
+# Get release information from GitHub API
+echo "Fetching release information..."
+RELEASE_DATA=$(curl -s "$API_URL")
+
+if [ $? -ne 0 ]; then
+    echo "Error: Failed to fetch release information from GitHub API"
+    exit 1
+fi
+
+# Check if release data is valid
+if echo "$RELEASE_DATA" | grep -q "Not Found"; then
+    echo "Error: Release not found. Please check the repository and tag."
+    exit 1
+fi
+
+# Extract download URLs for all assets
+DOWNLOAD_URLS=$(echo "$RELEASE_DATA" | grep -o '"browser_download_url": *"[^"]*"' | sed 's/"browser_download_url": *"//;s/"//')
+
+if [ -z "$DOWNLOAD_URLS" ]; then
+    echo "Error: No download URLs found in the release."
+    exit 1
+fi
+
+# Count total files
+TOTAL_FILES=$(echo "$DOWNLOAD_URLS" | wc -l)
+echo "Found $TOTAL_FILES files to download"
+echo ""
+
+# Download each file
+CURRENT=1
+echo "$DOWNLOAD_URLS" | while IFS= read -r url; do
+    if [ -n "$url" ]; then
+        # Extract filename from URL
+        FILENAME=$(basename "$url")
+        FILEPATH="$DOWNLOAD_DIR/$FILENAME"
+        
+        echo "[$CURRENT/$TOTAL_FILES] Downloading: $FILENAME"
+        
+        # Check if file already exists
+        if [ -f "$FILEPATH" ]; then
+            echo "  File already exists, skipping..."
+        else
+            # Download with progress bar
+            if curl -L -o "$FILEPATH" "$url" --progress-bar; then
+                echo "  ✓ Downloaded successfully"
+            else
+                echo "  ✗ Failed to download $FILENAME"
+                rm -f "$FILEPATH"  # Remove partial file
+            fi
+        fi
+        
+        echo ""
+        CURRENT=$((CURRENT + 1))
+    fi
+done
+
+echo "Download completed!"
+echo "Files saved to: $DOWNLOAD_DIR"
+
+# List downloaded files
+echo ""
+echo "Downloaded files:"
+ls -la "$DOWNLOAD_DIR"
+
+#############################################################################
+
 DEVICE_DATA_PATH="/var/tmp/device_data.json"
 OUTPUT_YAML_PATH="/home/user/fsa_programs/aws_iot_env_setup/GreengrassInstaller/config.yaml"
 CLAIM_CERTS_PATH="/home/user/fsa_programs/aws_iot_env_setup/claim-certs"
