@@ -1,3 +1,26 @@
+DEVICE_DATA_PATH="/var/tmp/device_data.json"
+OUTPUT_YAML_PATH="/home/user/fsa_programs/aws_iot_env_setup/GreengrassInstaller/config.yaml"
+CLAIM_CERTS_PATH="/home/user/fsa_programs/aws_iot_env_setup/claim-certs"
+
+sudo timedatectl set-timezone Asia/Singapore
+timedatectl
+
+if [ ! -d "$CLAIM_CERTS_PATH" ]; then
+  echo "Error: claim-certs directory not found."
+  exit 1
+fi
+
+if [ ! -f "$DEVICE_DATA_PATH" ]; then
+  echo "Error: Device data file not found at $DEVICE_DATA_PATH" >&2
+  exit 1
+fi
+
+DEVICE_ID=$(jq -r '.DeviceId' "$DEVICE_DATA_PATH")
+if [ -z "$DEVICE_ID" ] || [ "$DEVICE_ID" == "null" ]; then
+  echo "Error: DeviceId not found in $DEVICE_DATA_PATH" >&2
+  exit 1
+fi
+
 sudo cat > "$OUTPUT_YAML_PATH" <<EOF
 ---
 services:
