@@ -102,6 +102,7 @@ echo "$DOWNLOAD_URLS" | while IFS= read -r url; do
         if [ -f "$DESTPATH" ]; then
             echo "  File already exists, skipping..."
         else
+            echo " $DESTPATH not found"
             # Download with progress bar
             if curl -L -o "$FILEPATH" "$url" --progress-bar; then
                 echo "  ✓ Downloaded successfully"
