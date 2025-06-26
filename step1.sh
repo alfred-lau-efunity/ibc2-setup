@@ -99,7 +99,7 @@ echo "$DOWNLOAD_URLS" | while IFS= read -r url; do
         echo "[$CURRENT/$TOTAL_FILES] Downloading: $FILENAME"
         
         # Check if file already exists
-        if [ -f "$DESTPATH" ]; then
+        if [ -f "$FILEPATH" ]; then
             echo "  File already exists, skipping..."
         else
             echo " $DESTPATH not found"
