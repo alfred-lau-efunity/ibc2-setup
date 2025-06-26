@@ -94,11 +94,12 @@ echo "$DOWNLOAD_URLS" | while IFS= read -r url; do
         # Extract filename from URL
         FILENAME=$(basename "$url")
         FILEPATH="$TEMP_DOWNLOAD_DIR/$FILENAME"
+        DESTPATH=$FINAL_DR/$FILENAME"
         
         echo "[$CURRENT/$TOTAL_FILES] Downloading: $FILENAME"
         
         # Check if file already exists
-        if [ -f "$FILEPATH" ]; then
+        if [ -f "$DESTPATH" ]; then
             echo "  File already exists, skipping..."
         else
             # Download with progress bar
