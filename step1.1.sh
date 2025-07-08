@@ -2,6 +2,7 @@
 
 set -e  # Exit on any error
 
+sudo apt-get update
 sudo apt install xrdp -y
 sudo apt install xfce4 xfce4-session -y
 echo "xfce4-session" > ~/.xsession
