@@ -405,7 +405,7 @@ sudo systemctl enable davConvert.service
 sudo systemctl start davConvert.service
 
 # Show the service status
-sudo systemctl status davConvert.service
+# sudo systemctl status davConvert.service
 
 # Add the cron job to restart the service every hour
 #(crontab -l 2>/dev/null; echo "1 * * * * sudo systemctl restart davConvert.service") | crontab -
