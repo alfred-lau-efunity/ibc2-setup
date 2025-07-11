@@ -1,5 +1,26 @@
 #!/bin/bash
 
+
+set -e  # Exit on any error
+
+apt update
+sudo apt install inotify-tools ffmpeg
+
+sudo systemctl stop davConvert.service
+sudo systemctl disable davConvert.service
+
+sudo rm /etc/systemd/system/davConvert.service
+sudo systemctl daemon-reload && sudo systemctl reset-failed
+
+sudo rm /tmp/davConvert.lock
+sudo rm /usr/local/bin/davConvert.sh
+
+sudo truncate -s 0 /var/log/syslog
+sudo truncate -s 0 /var/log/syslog.1
+sudo rm -f /var/log/syslog.2.gz /var/log/syslog.3.gz /var/log/syslog.4.gz
+
+echo "✅ davConvert removed"
+
 CRON_JOB="1 * * * * sudo systemctl restart davConvert.service"
 
 # Dump crontab to a temp file
@@ -366,11 +387,15 @@ User=user
 Group=user
 Environment=PATH=/usr/local/bin:/usr/bin:/bin
 Environment=HOME=/home/user
+StandardOutput=null
+StandardError=null
 
 [Install]
 WantedBy=multi-user.target
 
 EOF
+
+mkdir -p /home/user/logs
 
 # Create davConvert.sh script
 echo "$DAVCONVERT_SH_CONTENT" > /tmp/davConvert.sh
